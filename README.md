@@ -16,6 +16,22 @@ Until a few years ago, developing for FPGAs required the use of proprietary lock
 
 There is a good and not too long article describing the design of Yosys/Nextpnr opensource FPGA toolchain very clearly and briefly, please refer to https://arxiv.org/pdf/1903.10407.pdf. 
 
-This tutorial will focus on this opensource toolchain of FPGA. there are also some opensource FPGA toolchains based on yosys/nextpnr, 
+This tutorial will focus on this opensource toolchain of FPGA. there are also some other opensource FPGA toolchains or frameworks, most of them are based on yosys/nextpnr, you do not need to care about them at this time.
+
+# Hardware requirements
+
+* A FPGA development board, which can be well supported by yosys/nextpnr.
+  - Lattice iCE40 or ECP5 family. for example, iCE40 ICEBreaker, ICESugar, ICESugar nano board, or ECP5 Colorlight series board.
+  - Gowin LittleBee family. for example, Tang nano 1k/4k/9k board.
+* Optional, a JTAG adapter.
+  - most of FPGA development board already integrated it.
+
+
+# Toolchain overview:
+
+* Synthesis: yosys
+* Place and route: nextpnr with multiple backend
+* Flashing tool: various different tools for different FPGA family
+
 
 
