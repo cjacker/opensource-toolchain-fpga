@@ -30,7 +30,7 @@ This tutorial will focus on this opensource toolchain of FPGA. there are also so
 # Toolchain overview:
 
 * Synthesis: yosys
-* Place and route: nextpnr with multiple backend
+* Place and route: nextpnr with multiple backend(iCE40, ECP5, GOWIN, etc.)
 * Flashing tool: various different tools for different FPGA family
 
 As mentioned above, the article "[Yosys+nextpnr: an Open Source Framework from
