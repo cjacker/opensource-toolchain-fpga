@@ -44,11 +44,9 @@ Synthesis is the process of converting input Verilog file into a netlist, netlis
 
 Yosys take verilog source codes as input and generate netlist using JSON format.
 
-Building yosys is simple, but you need have to install some build requirments such as make/bison/flex/g++/python3/abc and readline/tcl/libffi development packages, please use yum or apt to install these packages from your dist. repos.
+A lot of dist. maybe already packaged yosys, but I do not suggest use it directly, it's probability an outdated version. if the version is too old, you should consider building it yourself.
 
-I do not suggest use yosys package shipped with your dist, mostly because it's maybe an outdated version. please verify the version of yosys package your dist. provided, if it is too old, please try to build it yourself.
-
-you can download a release source tarball (up to this tut written, the latest version is 0.15) or clone the git repo from https://github.com/YosysHQ/yosys, and build it:
+Building yosys is very simple, but you need install some build requirments such as make/bison/flex/g++/python3/abc and readline/tcl/libffi development packages, then download a release source tarball (up to this tutorial written, the latest yosys version is 0.15) or clone the git repo from https://github.com/YosysHQ/yosys, and build it:
 
 ```
 make config-gcc
