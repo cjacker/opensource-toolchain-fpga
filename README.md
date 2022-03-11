@@ -12,4 +12,10 @@ for more information of FPGA, you can refer to https://en.wikipedia.org/wiki/Fie
 
 A programming language toolchain (such as C programming language) we known before is a 'translator' to translate the source codes to target binaries. the principles would be similar for FPGA, the toolchain of FPGA also works as a 'translator' to translate the source codes of hardware description languages (such as verilog) to target binaries (it called as 'bitstream file'), and the compilation process for FPGA consists of 'synthesis' and 'place and route' (P&R), and the final bitstream file will be uploaded to FPGA by a flashing tool.
 
+Until a few years ago, developing for FPGAs required the use of proprietary locked-down tools, but in the last few years, the satuation changed, open-source FPGA tools such as Yosys nextpnr have come flooding out. 
+
+There is a good and not too long article describing the design of Yosys/Nextpnr opensource FPGA toolchain very clearly and briefly, please refer to https://arxiv.org/pdf/1903.10407.pdf. 
+
+This tutorial will focus on this opensource toolchain of FPGA. there are also some opensource FPGA toolchains based on yosys/nextpnr, 
+
 
