@@ -10,12 +10,6 @@ And the programming language used with FPGA is far different from various progra
 
 for more information of FPGA, you can refer to https://en.wikipedia.org/wiki/Field-programmable_gate_array.
 
-
-
-
-
-
-
-
+A programming language toolchain (such as C programming language) we known before is a 'translator' to translate the source codes to target binaries. the principles would be similar for FPGA, the toolchain of FPGA also works as a 'translator' to translate the source codes of hardware description languages (such as verilog) to target binaries (it called as 'bitstream file'), and the compilation process for FPGA consists of 'synthesis' and 'place and route' (P&R), and the final bitstream file will be uploaded to FPGA by a flashing tool.
 
 
