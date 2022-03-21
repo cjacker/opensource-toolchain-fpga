@@ -27,18 +27,19 @@ This tutorial will focus on this opensource toolchain. there are also some other
 
 # Toolchain overview:
 
-* HDL Coding and Verification: iverilog for verilog, ghdl for VHDL.
+* Design and Verification: iverilog for verilog, ghdl for VHDL, verilator for verilog.
 * Synthesis: yosys and ghdl-yosys-plugin
+* Equivalence checking: yosys
 * Place and route: nextpnr with multiple backend(iCE40, ECP5, GOWIN, etc.)
 * Flashing tool: various different tools for different FPGA family
 * Other tools: gtkwave (waveform viewer), digitaljs (simulator), etc.
 
-As mentioned above, the article "[Yosys+nextpnr: an Open Source Framework from
-Verilog to Bitstream for Commercial FPGAs](https://arxiv.org/pdf/1903.10407.pdf)" describes Yosys/Nextpnr framework very clearly and briefly, I suggest you must read it first before continuing, then you should be able to understand the architechture of the toolchain and the input/output of every step.
 
-# HDL Coding and Verification
+# Design and Verification
 
-## Verilog
+NOTE, all codes used in this chapter are provided within this repo.
+
+## iVerilog
 
 Icarus Verilog is a opensource Verilog simulation and synthesis tool. It operates as a compiler, compiling source code written in Verilog (IEEE-1364) into some target format. For batch simulation, the compiler can generate an intermediate form called vvp assembly. This intermediate form is executed by the `vvp` command. For synthesis, the compiler generates netlists in the desired format. 
 
@@ -160,7 +161,7 @@ On the left panel select signals while holding Shift/Ctrl and click 'Append' but
 <img src="https://user-images.githubusercontent.com/1625340/159230111-fff0d786-baad-4a1b-b8dc-928d3127fcc7.png" width="90%"/>
 
 
-## VHDL
+## GHDL
 
 GHDL is an open-source simulator for the VHDL language. GHDL allows you to compile and execute your VHDL code directly in your PC.
 
@@ -255,6 +256,118 @@ The wave form `and_gate_testbench.vcd` will be generated and contains the wavefo
 ```
 gtkwave and_gate_testbench.vcd
 ```
+
+## Verilator
+Verilator is a tool that compiles Verilog and SystemVerilog sources to highly optimized (and optionally multithreaded) cycle-accurate C++ or SystemC code. The converted modules can be instantiated and used in a C++ or a SystemC testbench, for verification and/or modelling purposes.
+
+More information can be found at [the official Verilator website](https://www.veripool.org/verilator/) and [the official manual](https://verilator.org/guide/latest/).
+
+Up to this tutorial written, the latest version of verilator is '4.220', most modern dist already shipped verilator in their repos, you can install it via the package management tool, and it's not neccesary to build it yourself.
+
+Here we use 'and_gate.v' as example:
+
+```
+//and_gate.v -- and gate
+module and_gate(
+    input d1,
+    input d2,
+    output q
+);
+    assign q = d1 & d2;
+endmodule
+```
+
+Verilator requires a C++ testbench gets compiled into a native system binary. first it need to use Verilator to convert the SystemVerilog code into C++, or “Verilate” it, which in it’s most basic form is done as follows:
+
+```
+verilator --cc and_gate.v
+```
+
+The `--cc` parameter here tells Verilator to convert to C++. Verilator also supports conversion to SystemC, which can be done by using `--sc`, but we will not be using this functionality for now.
+
+Running the above command generates a new folder named `obj_dir`  with lot of files in current working directory:
+
+```
+$ ls obj_dir
+Vand_gate_classes.mk  Vand_gate.h   Vand_gate__Slow.cpp  Vand_gate__Syms.h  Vand_gate__verFiles.dat
+Vand_gate.cpp         Vand_gate.mk  Vand_gate__Syms.cpp  Vand_gate__ver.d
+```
+
+The generated `.mk` files will be used with Make to build our simulation executable, while the .h and .cpp files contain our C++ headers and implementation sources, resulting from the verilog conversion.
+
+Then create `and_gate_testbench.cpp` under `obj_dir` with below codes:
+
+```
+#include <stdlib.h>
+#include <iostream>
+#include <verilated.h>
+#include <verilated_vcd_c.h>
+#include "Vand_gate.h"
+
+#define SIM_TIME 40
+
+vluint64_t sim_time = 0;
+
+int main(int argc, char** argv, char** env) {
+
+    Vand_gate *ag = new Vand_gate;
+
+    Verilated::traceEverOn(true);
+    VerilatedVcdC *m_trace = new VerilatedVcdC;
+
+    ag->trace(m_trace, 5);
+
+    m_trace->open("and_gate_testbench.vcd");
+
+    while (sim_time <= SIM_TIME) {
+        if(sim_time < 10) {
+          ag->d1 = 0;
+          ag->d2 = 0;
+        } else if(sim_time < 20) {
+          ag->d1 = 0;
+          ag->d2 = 1;
+        } else if(sim_time < 30) {
+          ag->d1 = 1;
+          ag->d2 = 0;
+        } else {
+          ag->d1 = 1;
+          ag->d2 = 1;
+        }
+        ag->eval();
+        m_trace->dump(sim_time);
+        sim_time++;
+    }
+
+    m_trace->close();
+
+    delete ag;
+    exit(EXIT_SUCCESS);
+}
+```
+
+To build the simulation executable, we need to run Verilator again to regenerate the .mk files to include the C++ testbench - this is done using `--exe and_gate_testbench.cpp`:
+
+```
+verilator -Wall --trace -cc and_gate.v --exe and_gate_testbench.cpp
+```
+
+and build it:
+
+```
+make -C obj_dir -f Vand_gate.mk Vand_gate
+```
+
+Once built, simply run the Valu binary to run the simulation:
+
+```
+$./obj_dir/Vand_gate
+```
+
+Running the simulation resulted in a waveform file named `and_gate_testbench.vcd` being generated in current working directory.
+```
+gtkwave ./and_gate_testbench.vcd
+```
+
 
 # Yosys
 
