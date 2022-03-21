@@ -39,13 +39,16 @@ Verilog to Bitstream for Commercial FPGAs](https://arxiv.org/pdf/1903.10407.pdf)
 # HDL
 
 ## Verilog
-Icarus Verilog is a Verilog simulation and synthesis tool. It operates as a compiler, compiling source code written in Verilog (IEEE-1364) into some target format. For batch simulation, the compiler can generate an intermediate form called vvp assembly. This intermediate form is executed by the ``vvp'' command. For synthesis, the compiler generates netlists in the desired format. 
 
-for more information, refer to http://iverilog.icarus.com/. 
+Icarus Verilog is a Verilog simulation and synthesis tool. It operates as a compiler, compiling source code written in Verilog (IEEE-1364) into some target format. For batch simulation, the compiler can generate an intermediate form called vvp assembly. This intermediate form is executed by the `vvp` command. For synthesis, the compiler generates netlists in the desired format. 
+
+For more information, refer to http://iverilog.icarus.com/. 
 
 Up to this tutorial written, the latest version of iverilog is '11.0', most modern dist already shipped iverilog in their repos, you can install it via yum/apt, and it's not neccesary to build iverilog yourself.
 
 Here is a brief intro of iverilog usage. 
+
+**Demo codes**
 
 Save below codes to 'gate.v':
 
@@ -60,6 +63,8 @@ module and_gate(
 endmodule
 ```
 
+**Compile and Run/Simulate**
+
 compile:
 ```
 iverilog -o gate.vvp gate.v
@@ -71,6 +76,8 @@ run and simulate:
 # or
 vvp ./gate.vvp
 ```
+
+**Verification**
 
 Usally, we also write corresponding test codes for verification:
 
@@ -111,6 +118,8 @@ input: 0x1 0x0, output: 0x0
 input: 0x1 0x1, output: 0x1
 ```
 
+**View waveform**
+
 Dump the waveform (use $dumpfile and $dumpvars):
 
 ```
@@ -145,6 +154,9 @@ It will generate `gate_testbench.vcd` which will contain the waveform data. laun
 ```
 gtkwave gate_testbench.vcd
 ```
+
+On the left panel select signals while holding Shift/Ctrl and click 'Append' button on the bottom. Use ctrl-shift-r to reload the VCD file without reconfiguring GTKWave signal selection:
+
 <img src="https://user-images.githubusercontent.com/1625340/159230111-fff0d786-baad-4a1b-b8dc-928d3127fcc7.png" width="90%"/>
 
 
