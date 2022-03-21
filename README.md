@@ -36,6 +36,77 @@ This tutorial will focus on this opensource toolchain. there are also some other
 As mentioned above, the article "[Yosys+nextpnr: an Open Source Framework from
 Verilog to Bitstream for Commercial FPGAs](https://arxiv.org/pdf/1903.10407.pdf)" describes Yosys/Nextpnr framework very clearly and briefly, I suggest you must read it first before continuing, then you should be able to understand the architechture of the toolchain and the input/output of every step.
 
+# HDL
+## Verilog
+Icarus Verilog is a Verilog simulation and synthesis tool. It operates as a compiler, compiling source code written in Verilog (IEEE-1364) into some target format. For batch simulation, the compiler can generate an intermediate form called vvp assembly. This intermediate form is executed by the ``vvp'' command. For synthesis, the compiler generates netlists in the desired format. 
+
+for more information, refer to http://iverilog.icarus.com/. 
+
+Up to this tutorial written, the latest version of iverilog is '11.0', most modern dist. already ship iverilog in their dist. repos, you can install it via yum/apt, and it's not neccesary to build iverilog yourself.
+
+Here is a brief intro of iverilog usage.
+
+Consider the 'gate.v':
+
+```
+//gate.v
+
+//and_gate
+module and_gate(
+    input d1,
+    input d2,
+    output q
+);
+    initial begin
+        $display("and_gate");
+    end
+    assign q = d1 & d2;
+
+endmodule
+```
+
+compilation:
+```
+iverilog -o gate.vvp gate.v
+```
+run:
+```
+./gate.vvp 
+# or
+vvp ./gate.vvp
+```
+Usally, we will write some test codes for our design, such as 'gate_tb.v':
+
+```
+//gate_tb.v
+
+`timescale 1ns/10ps
+
+module gate_testbench;
+    reg d1i;
+    reg d2i;
+    wire qo;
+    and_gate ag0(.d1(d1i), .d2(d2i), .q(qo));
+    initial begin
+        d1i <= 0; d2i <= 0;
+    #5  $display("input: 0x%0h 0x%0h, output: 0x%0h", d1i, d2i, qo);
+    #5  d1i <= 0; d2i <= 1;
+    #5  $display("input: 0x%0h 0x%0h, output: 0x%0h", d1i, d2i, qo);
+    #5  d1i <= 1; d2i <= 0;
+    #5  $display("input: 0x%0h 0x%0h, output: 0x%0h", d1i, d2i, qo);
+    #5  d1i <= 1; d2i <= 1;
+    #5  $display("input: 0x%0h 0x%0h, output: 0x%0h", d1i, d2i, qo);
+    end
+endmodule
+```
+
+compile and run:
+```
+iverilog -o gate_testbench.vvp gate_testbench.v gate.v
+vvp ./gate_testbench.vvp
+```
+
+
 # Yosys
 
 Synthesis is the process of converting input Verilog file into a netlist, netlist is a "list of nets", which describes the connections between different block available on the desired FPGA chip. However, it is worth to notice that these are only logical connections. So the synthesized model is only a draft of the final design, made with the use of available resources.
