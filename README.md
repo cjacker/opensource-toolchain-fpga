@@ -369,15 +369,15 @@ gtkwave ./and_gate_testbench.vcd
 ```
 
 
-# Yosys
+# Synthesis
 
-Synthesis is the process of converting input Verilog file into a netlist, netlist is a "list of nets", which describes the connections between different block available on the desired FPGA chip. However, it is worth to notice that these are only logical connections. So the synthesized model is only a draft of the final design, made with the use of available resources.
+Synthesis is the process of converting input HDL source files into a netlist, netlist is a "list of nets", which describes the connections between different block available on the desired FPGA chip. However, it is worth to notice that these are only logical connections. So the synthesized model is only a draft of the final design, made with the use of available resources.
 
 **Yosys (Yosys Open SYnthesis Suite)** is a opensource framework for RTL synthesis tools. It currently has extensive Verilog-2005 support and provides a basic set of synthesis algorithms for various application domains.
 
-Yosys take verilog source codes as input and generate netlist using JSON format.
+Yosys take HDL source codes as input and generate netlist using JSON format.
 
-A lot of dist. maybe already packaged yosys, but I do not suggest use it directly, it's probability an outdated version. if the version is too old, you should consider building it yourself.
+A lot of modern dist maybe already packaged yosys. since it's probability an outdated versionbut, I do not suggest use it directly. if the version is too old, you should consider building it yourself.
 
 Building yosys is very simple, but you need install some build requirments such as make/bison/flex/g++/python3/abc and readline/tcl/libffi development packages, then download a release source tarball (up to this tutorial written, the latest yosys version is 0.15) or clone the git repo from https://github.com/YosysHQ/yosys, and build it:
 
