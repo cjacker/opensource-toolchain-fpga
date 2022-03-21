@@ -37,6 +37,7 @@ As mentioned above, the article "[Yosys+nextpnr: an Open Source Framework from
 Verilog to Bitstream for Commercial FPGAs](https://arxiv.org/pdf/1903.10407.pdf)" describes Yosys/Nextpnr framework very clearly and briefly, I suggest you must read it first before continuing, then you should be able to understand the architechture of the toolchain and the input/output of every step.
 
 # HDL
+
 ## Verilog
 Icarus Verilog is a Verilog simulation and synthesis tool. It operates as a compiler, compiling source code written in Verilog (IEEE-1364) into some target format. For batch simulation, the compiler can generate an intermediate form called vvp assembly. This intermediate form is executed by the ``vvp'' command. For synthesis, the compiler generates netlists in the desired format. 
 
@@ -44,38 +45,34 @@ for more information, refer to http://iverilog.icarus.com/.
 
 Up to this tutorial written, the latest version of iverilog is '11.0', most modern dist. already ship iverilog in their dist. repos, you can install it via yum/apt, and it's not neccesary to build iverilog yourself.
 
-Here is a brief intro of iverilog usage.
+Here is a brief intro of iverilog usage. 
 
-Consider the 'gate.v':
+Save below codes to 'gate.v':
 
 ```
-//gate.v
-
-//and_gate
+//gate.v -- and gate
 module and_gate(
     input d1,
     input d2,
     output q
 );
-    initial begin
-        $display("and_gate");
-    end
     assign q = d1 & d2;
-
 endmodule
 ```
 
-compilation:
+compile:
 ```
 iverilog -o gate.vvp gate.v
 ```
+
 run:
 ```
 ./gate.vvp 
 # or
 vvp ./gate.vvp
 ```
-Usally, we will write some test codes for our design, such as 'gate_tb.v':
+
+Usally, we also write corresponding test codes for our design, such as 'gate_tb.v':
 
 ```
 //gate_tb.v
@@ -105,6 +102,15 @@ compile and run:
 iverilog -o gate_testbench.vvp gate_testbench.v gate.v
 vvp ./gate_testbench.vvp
 ```
+
+The output looks like:
+```
+input: 0x0 0x0, output: 0x0
+input: 0x0 0x1, output: 0x0
+input: 0x1 0x0, output: 0x0
+input: 0x1 0x1, output: 0x1
+```
+
 
 
 # Yosys
