@@ -27,7 +27,7 @@ This tutorial will focus on this opensource toolchain. there are also some other
 
 # Toolchain overview:
 
-* HDL: iverilog for verilog, ghdl for VHDL. (Spinal or Chipsel can be used also)
+* HDL Coding and Verification: iverilog for verilog, ghdl for VHDL.
 * Synthesis: yosys and ghdl-yosys-plugin
 * Place and route: nextpnr with multiple backend(iCE40, ECP5, GOWIN, etc.)
 * Flashing tool: various different tools for different FPGA family
@@ -36,11 +36,11 @@ This tutorial will focus on this opensource toolchain. there are also some other
 As mentioned above, the article "[Yosys+nextpnr: an Open Source Framework from
 Verilog to Bitstream for Commercial FPGAs](https://arxiv.org/pdf/1903.10407.pdf)" describes Yosys/Nextpnr framework very clearly and briefly, I suggest you must read it first before continuing, then you should be able to understand the architechture of the toolchain and the input/output of every step.
 
-# HDL
+# HDL Coding and Verification
 
 ## Verilog
 
-Icarus Verilog is a Verilog simulation and synthesis tool. It operates as a compiler, compiling source code written in Verilog (IEEE-1364) into some target format. For batch simulation, the compiler can generate an intermediate form called vvp assembly. This intermediate form is executed by the `vvp` command. For synthesis, the compiler generates netlists in the desired format. 
+Icarus Verilog is a opensource Verilog simulation and synthesis tool. It operates as a compiler, compiling source code written in Verilog (IEEE-1364) into some target format. For batch simulation, the compiler can generate an intermediate form called vvp assembly. This intermediate form is executed by the `vvp` command. For synthesis, the compiler generates netlists in the desired format. 
 
 For more information, refer to http://iverilog.icarus.com/. 
 
@@ -161,6 +161,7 @@ On the left panel select signals while holding Shift/Ctrl and click 'Append' but
 
 
 ## VHDL
+
 GHDL is an open-source simulator for the VHDL language. GHDL allows you to compile and execute your VHDL code directly in your PC.
 
 GHDL fully supports the 1987, 1993, 2002 versions of the IEEE 1076 VHDL standard, and partially the latest 2008 revision (well enough to support fixed_generic_pkg or float_generic_pkg).
@@ -172,6 +173,7 @@ Up to this tutorial written, the latest version of ghdl is '2.0.0', most modern 
 Here is a brief intro of ghdl usage.
 
 **Demo codes**
+
 Here still use and gate as example, save below codes to 'and_gate.vhd':
 
 ```
@@ -228,6 +230,7 @@ end;
 ```
 
 **Build and run**
+
 ```
 ghdl -a and_gate.vhd
 ghdl -a and_gate_testbench.vhd
@@ -242,6 +245,7 @@ and_gate_testbench.vhd:29:9:@40ns:(report note): and gate testbench finished
 ```
 
 **View waveform**
+
 ```
 ./and_gate_testbench --vcd=and_gate_testbench.vcd
 ```
@@ -251,7 +255,6 @@ The wave form `and_gate_testbench.vcd` will be generated and contains the wavefo
 ```
 gtkwave and_gate_testbench.vcd
 ```
-
 
 # Yosys
 
