@@ -43,7 +43,7 @@ Icarus Verilog is a Verilog simulation and synthesis tool. It operates as a comp
 
 for more information, refer to http://iverilog.icarus.com/. 
 
-Up to this tutorial written, the latest version of iverilog is '11.0', most modern dist. already ship iverilog in their dist. repos, you can install it via yum/apt, and it's not neccesary to build iverilog yourself.
+Up to this tutorial written, the latest version of iverilog is '11.0', most modern dist already shipped iverilog in their repos, you can install it via yum/apt, and it's not neccesary to build iverilog yourself.
 
 Here is a brief intro of iverilog usage. 
 
@@ -65,17 +65,17 @@ compile:
 iverilog -o gate.vvp gate.v
 ```
 
-run:
+run and simulate:
 ```
 ./gate.vvp 
 # or
 vvp ./gate.vvp
 ```
 
-Usally, we also write corresponding test codes for our design, such as 'gate_tb.v':
+Usally, we also write corresponding test codes for verification:
 
 ```
-//gate_tb.v
+//gate_testbench.v
 
 `timescale 1ns/10ps
 
@@ -111,6 +111,41 @@ input: 0x1 0x0, output: 0x0
 input: 0x1 0x1, output: 0x1
 ```
 
+Dump the waveform (use $dumpfile and $dumpvars):
+
+```
+//gate_testbench.v
+`timescale 1ns/10ps
+
+module gate_testbench;
+    reg d1i;
+    reg d2i;
+    wire qo;
+    and_gate ag0(.d1(d1i), .d2(d2i), .q(qo));
+    initial begin
+        $dumpfile("gate_testbench.vcd");
+        $dumpvars(0, gate_testbench);
+        d1i <= 0; d2i <= 0;
+    #10 d1i <= 0; d2i <= 1;
+    #10 d1i <= 1; d2i <= 0;
+    #10 d1i <= 1; d2i <= 1;
+    #10 $finish;
+    end
+endmodule
+```
+
+compile and run again:
+```
+iverilog -o gate_testbench.vvp gate_testbench.v gate.v
+vvp ./gate_testbench.vvp
+```
+
+It will generate `gate_testbench.vcd` which will contain the waveform data. launch GTKWave with the filename as argument:
+
+```
+gtkwave gate_testbench.vcd
+```
+<img src="https://user-images.githubusercontent.com/1625340/159230111-fff0d786-baad-4a1b-b8dc-928d3127fcc7.png" width="70%"/>
 
 
 # Yosys
