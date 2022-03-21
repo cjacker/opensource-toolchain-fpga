@@ -50,10 +50,10 @@ Here is a brief intro of iverilog usage.
 
 **Demo codes**
 
-Save below codes to 'gate.v':
+Save below codes to 'and_gate.v':
 
 ```
-//gate.v -- and gate
+//and_gate.v -- and gate
 module and_gate(
     input d1,
     input d2,
@@ -67,14 +67,14 @@ endmodule
 
 compile:
 ```
-iverilog -o gate.vvp gate.v
+iverilog -o and_gate.vvp and_gate.v
 ```
 
 run and simulate:
 ```
-./gate.vvp 
+./and_gate.vvp 
 # or
-vvp ./gate.vvp
+vvp ./and_gate.vvp
 ```
 
 **Verification**
@@ -82,11 +82,11 @@ vvp ./gate.vvp
 Usally, we also write corresponding test codes for verification:
 
 ```
-//gate_testbench.v
+//and_gate_testbench.v
 
 `timescale 1ns/10ps
 
-module gate_testbench;
+module and_gate_testbench;
     reg d1i;
     reg d2i;
     wire qo;
@@ -106,8 +106,8 @@ endmodule
 
 compile and run:
 ```
-iverilog -o gate_testbench.vvp gate_testbench.v gate.v
-vvp ./gate_testbench.vvp
+iverilog -o and_gate_testbench.vvp and_gate_testbench.v and_gate.v
+vvp ./and_gate_testbench.vvp
 ```
 
 The output looks like:
@@ -123,17 +123,17 @@ input: 0x1 0x1, output: 0x1
 Dump the waveform (use $dumpfile and $dumpvars):
 
 ```
-//gate_testbench.v
+//and_gate_testbench.v
 `timescale 1ns/10ps
 
-module gate_testbench;
+module and_gate_testbench;
     reg d1i;
     reg d2i;
     wire qo;
     and_gate ag0(.d1(d1i), .d2(d2i), .q(qo));
     initial begin
-        $dumpfile("gate_testbench.vcd");
-        $dumpvars(0, gate_testbench);
+        $dumpfile("and_gate_testbench.vcd");
+        $dumpvars(0, and_gate_testbench);
         d1i <= 0; d2i <= 0;
     #10 d1i <= 0; d2i <= 1;
     #10 d1i <= 1; d2i <= 0;
@@ -145,14 +145,14 @@ endmodule
 
 compile and run again:
 ```
-iverilog -o gate_testbench.vvp gate_testbench.v gate.v
-vvp ./gate_testbench.vvp
+iverilog -o and_gate_testbench.vvp and_gate_testbench.v gate.v
+vvp ./and_gate_testbench.vvp
 ```
 
-It will generate `gate_testbench.vcd` which will contain the waveform data. launch GTKWave with the filename as argument:
+It will generate `and_gate_testbench.vcd` which will contain the waveform data. launch GTKWave with the filename as argument:
 
 ```
-gtkwave gate_testbench.vcd
+gtkwave and_gate_testbench.vcd
 ```
 
 On the left panel select signals while holding Shift/Ctrl and click 'Append' button on the bottom. Use ctrl-shift-r to reload the VCD file without reconfiguring GTKWave signal selection:
