@@ -145,7 +145,7 @@ It will generate `gate_testbench.vcd` which will contain the waveform data. laun
 ```
 gtkwave gate_testbench.vcd
 ```
-<img src="https://user-images.githubusercontent.com/1625340/159230111-fff0d786-baad-4a1b-b8dc-928d3127fcc7.png" width="70%"/>
+<img src="https://user-images.githubusercontent.com/1625340/159230111-fff0d786-baad-4a1b-b8dc-928d3127fcc7.png" width="90%"/>
 
 
 # Yosys
