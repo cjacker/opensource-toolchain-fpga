@@ -160,6 +160,99 @@ On the left panel select signals while holding Shift/Ctrl and click 'Append' but
 <img src="https://user-images.githubusercontent.com/1625340/159230111-fff0d786-baad-4a1b-b8dc-928d3127fcc7.png" width="90%"/>
 
 
+## VHDL
+GHDL is an open-source simulator for the VHDL language. GHDL allows you to compile and execute your VHDL code directly in your PC.
+
+GHDL fully supports the 1987, 1993, 2002 versions of the IEEE 1076 VHDL standard, and partially the latest 2008 revision (well enough to support fixed_generic_pkg or float_generic_pkg).
+
+For more information, please refer to http://ghdl.free.fr/
+
+Up to this tutorial written, the latest version of ghdl is '2.0.0', most modern dist already shipped ghdl with multiple backend in their repos, you can install it via your package management tool, and it's not neccesary to build it yourself.
+
+Here is a brief intro of ghdl usage.
+
+**Demo codes**
+Here still use and gate as example, save below codes to 'and_gate.vhd':
+
+```
+library ieee;
+use ieee.std_logic_1164.all;
+
+entity and_gate is
+  port(d1,d2:in std_logic;
+       q:out std_logic);
+end and_gate;
+
+architecture behavior of and_gate is
+begin
+  q <= d1 and d2;
+end behavior;
+```
+
+and below codes to 'and_gate_testbench.vhd'
+
+```
+-- and_gate_testbench.vhd
+library ieee;
+use ieee.std_logic_1164.all;
+
+entity and_gate_testbench is
+end and_gate_testbench;
+
+architecture behavior of and_gate_testbench is
+    component and_gate is
+        port (
+            d1  : in  std_logic;
+            d2  : in  std_logic;
+            q   : out std_logic);
+    end component;
+    signal input  : std_logic_vector(0 to 1);
+    signal output : std_logic;
+begin
+    uut: and_gate port map (
+        d1 => input(0),
+        d2 => input(1),
+        q  => output
+    );
+
+    stim_proc: process
+    begin
+        input <= "00"; wait for 10 ns; assert output = '0' report "0 and 0 failed";
+        input <= "01"; wait for 10 ns; assert output = '0' report "0 and 1 failed";
+        input <= "10"; wait for 10 ns; assert output = '0' report "1 and 0 failed";
+        input <= "11"; wait for 10 ns; assert output = '1' report "1 and 1 failed";
+        report "and gate testbench finished";
+        wait;
+    end process;
+end;
+```
+
+**Build and run**
+```
+ghdl -a and_gate.vhd
+ghdl -a and_gate_testbench.vhd
+ghdl -e and_gate_testbench
+./and_gate_testbench
+```
+
+The output looks like:
+
+```
+and_gate_testbench.vhd:29:9:@40ns:(report note): and gate testbench finished
+```
+
+**View waveform**
+```
+./and_gate_testbench --vcd=and_gate_testbench.vcd
+```
+
+The wave form `and_gate_testbench.vcd` will be generated and contains the waveform data. launch GTKWave with the filename as argument:
+
+```
+gtkwave and_gate_testbench.vcd
+```
+
+
 # Yosys
 
 Synthesis is the process of converting input Verilog file into a netlist, netlist is a "list of nets", which describes the connections between different block available on the desired FPGA chip. However, it is worth to notice that these are only logical connections. So the synthesized model is only a draft of the final design, made with the use of available resources.
