@@ -37,7 +37,9 @@ This tutorial will focus on this opensource toolchain. there are also some other
 
 # Design and Verification
 
-NOTE, all codes used in this chapter are provided within this repo.
+NOTE:
+- all codes used in this chapter are provided within this repo.
+- Chipsel/SpinalHDL can be used to generate VHDL/Verilog files, it's another topic and will not include in this tutorial.
 
 ## iVerilog
 
