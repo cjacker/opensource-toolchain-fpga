@@ -27,7 +27,7 @@ This tutorial will focus on this opensource toolchain. there are also some other
 
 # Toolchain overview:
 
-* Design and Verification: iverilog for verilog, ghdl for VHDL, verilator for verilog.
+* Design and Verification: iVerilog for verilog, GHDL for VHDL, Verilator for verilog, Digital for verilog
 * Synthesis: yosys and ghdl-yosys-plugin
 * Equivalence checking: yosys
 * Place and route: nextpnr with multiple backend(iCE40, ECP5, GOWIN, etc.)
@@ -367,6 +367,21 @@ Running the simulation resulted in a waveform file named `and_gate_testbench.vcd
 ```
 gtkwave ./and_gate_testbench.vcd
 ```
+
+## Digital
+[Digital](https://github.com/hneemann/Digital) is an easy-to-use digital logic designer and circuit simulator designed for educational purposes, and it can be exported to VHDL or Verilog
+
+There is no installation required, just download and unpack the [Digital.zip](https://github.com/hneemann/Digital/releases/download/v0.29/Digital.zip) file and run:
+
+```
+java -jar Digital.jar
+```
+
+And the 'and_gate' example in digital looks like:
+
+<img src="https://user-images.githubusercontent.com/1625340/159297256-73d3724a-51f1-40ed-b2ec-8e14676d4ad6.png" width="80%"/>
+
+You can simulate it directly or export to VHDL or Verilog.
 
 
 # Synthesis
