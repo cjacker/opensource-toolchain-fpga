@@ -744,25 +744,29 @@ Depend on the development status of backends, different backends can support dif
 If you have a iCESugar nano board, the 'blink.v' should be:
 
 ```
-module switch(  input CLK,
-                output LED
-                );
+module blink(
+   input clk,
+   output led
+);
    reg [25:0] counter;
+
    initial begin
       counter = 0;
    end
-   always @(posedge CLK)
-   begin
+
+   always @(posedge clk ) begin
       counter <= counter + 1;
    end
-   assign LED = ~counter[23];
+
+   assign led = ~counter[23];
+
 endmodule
 ```
 
-and 'io.pcf' should be:
+and 'io.pcf' for icesugar nano board should be:
 ```
-set_io LED B6
-set_io CLK D1
+set_io led B6
+set_io clk D1
 ```
 
 and Run:
