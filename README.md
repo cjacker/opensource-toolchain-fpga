@@ -767,14 +767,14 @@ set_io CLK D1
 
 and Run:
 ```
-yosys -ql blink-yosys.log -p "read_verilog blink.v; synth_ice40 -json top.json"
-nextpnr-ice40  -ql blink-nextpnr.log --lp1k --package cm36 --json top.json --pcf io.pcf --asc top.asc --freq 48
-icetime -d lp1k -mtr blink.rpt top.asc
+$ yosys -ql blink-yosys.log -p "read_verilog blink.v; synth_ice40 -json top.json"
+$ nextpnr-ice40  -ql blink-nextpnr.log --lp1k --package cm36 --json top.json --pcf io.pcf --asc top.asc --freq 48
+$ icetime -d lp1k -mtr blink.rpt top.asc
 // Reading input .asc file..
 // Reading 1k chipdb file..
 // Creating timing netlist..
 // Timing estimate: 7.48 ns (133.68 MHz)
-icepack top.asc blink.bin
+$ icepack top.asc blink.bin
 ```
 
 ## Usage demo for ECP5 (ColorLight-i9 board)
