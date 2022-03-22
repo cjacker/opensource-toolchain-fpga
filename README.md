@@ -27,7 +27,7 @@ This tutorial will focus on this opensource toolchain. there are also some other
 
 # Toolchain overview:
 
-* Design and Verification: iVerilog for verilog, GHDL for VHDL, Verilator for verilog, Digital for verilog
+* Design and Verification: iVerilog for verilog, GHDL for VHDL, Verilator for verilog, Digital for verilog/VHDL
 * Synthesis: yosys and ghdl-yosys-plugin
 * Equivalence checking: yosys
 * Place and route: nextpnr with multiple backend(iCE40, ECP5, GOWIN, etc.)
