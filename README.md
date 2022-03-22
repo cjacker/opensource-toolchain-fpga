@@ -31,7 +31,7 @@ This tutorial will focus on this opensource toolchain. there are also some other
 * Synthesis: yosys and ghdl-yosys-plugin
 * Equivalence checking: yosys
 * Place and route: nextpnr with multiple backend(iCE40, ECP5, GOWIN, etc.)
-* Flashing tool: various different tools for different FPGA family
+* Deploy/Flashing tool: various different tools for different FPGA family
 * Other tools: gtkwave (waveform viewer), digitaljs (simulator), etc.
 
 
@@ -383,12 +383,14 @@ And the 'and_gate' example in digital looks like:
 
 <img src="https://user-images.githubusercontent.com/1625340/159297256-73d3724a-51f1-40ed-b2ec-8e14676d4ad6.png" width="80%"/>
 
-You can simulate it directly or export to VHDL or Verilog.
+You can simulate it directly or export to VHDL or Verilog, after VHDL/Verilog generated, please refer to above related sections.
 
 
 # Synthesis
 
 Synthesis is the process of converting input HDL source files into a netlist, netlist is a "list of nets", which describes the connections between different block available on the desired FPGA chip. However, it is worth to notice that these are only logical connections. So the synthesized model is only a draft of the final design, made with the use of available resources.
+
+## Yosys basic usage
 
 **Yosys (Yosys Open SYnthesis Suite)** is a opensource framework for RTL synthesis tools. It currently has extensive Verilog-2005 support and provides a basic set of synthesis algorithms for various application domains.
 
@@ -404,20 +406,249 @@ make PREFIX=/usr ABCEXTERNAL=/usr/bin/abc PRETTY=0 all
 make PREFIX=/usr ABCEXTERNAL=/usr/bin/abc install
 ```
 
-The 'yosys' command will be installed to standard dir '/usr/bin'.
+The 'yosys' command will be installed to standard dir '/usr/bin'. If the 'PREFIX' is not set to standard dir, please change PATH env after installtion according to your 'PREFIX' setup.
 
-After build and installation successfully, try it with 'blink.v' (a demo verilog source file):
+After build and installation successfully, try it with 'and_gate.v':
 
 ```
+// and_gate.v -- and gate
+module and_gate(
+    input d1,
+    input d2,
+    output q
+);
+    assign q = d1 & d2;
+endmodule
 ```
 
-# Nextpnr
+Yosys is a REPL, you can use it interactively or use batch script mode.
+
+**REPL mode:**
+
+```
+$ yosys
+yosys> read_verilog and_gate.v
+1. Executing Verilog-2005 frontend: and_gate.v
+Parsing Verilog input from `and_gate.v' to AST representation.
+Generating RTLIL representation for module `\and_gate'.
+Successfully finished Verilog frontend.
+
+yosys> show
+2. Generating Graphviz representation of design.
+Writing dot description to `.yosys_show.dot'.
+Dumping module and_gate to page 1.
+Exec: { test -f '.yosys_show.dot.pid' && fuser -s '.yosys_show.dot.pid' 2> /dev/null; } || ( echo $$ >&3; exec xdot '.yosys_show.dot'; ) 3> '.yosys_show.dot.pid' &
+
+yosys>
+```
+
+**Try to run 'help' in REPL mode to find the usage of yosys REPL commands.**
+
+You should have 'graphviz' and 'xdot' installed first, yosys will generate the graphviz representation of design looks like:
+
+<img src="https://user-images.githubusercontent.com/1625340/159398408-31e5a22d-b873-424f-8943-014debc3a210.png" width="60%">
+
+**Batch mode**
+
+You can create a batch file, for example, named "show.ys":
+
+```
+# show.ys -- batch script file for yosys
+read_verilog and_gate.v
+show
+```
+And involk yosys with it:
+```
+yosys show.ys
+```
+
+or use `-p` argument:
+```
+yosys -p "read_verilog and_gate.v; show"
+```
+
+**Synthesis**
+
+Yosys support below synthesis command (run 'help' in REPL mode):
+```
+    synth                generic synthesis script
+    synth_achronix       synthesis for Acrhonix Speedster22i FPGAs.
+    synth_anlogic        synthesis for Anlogic FPGAs
+    synth_coolrunner2    synthesis for Xilinx Coolrunner-II CPLDs
+    synth_easic          synthesis for eASIC platform
+    synth_ecp5           synthesis for ECP5 FPGAs
+    synth_efinix         synthesis for Efinix FPGAs
+    synth_gatemate       synthesis for Cologne Chip GateMate FPGAs
+    synth_gowin          synthesis for Gowin FPGAs
+    synth_greenpak4      synthesis for GreenPAK4 FPGAs
+    synth_ice40          synthesis for iCE40 FPGAs
+    synth_intel          synthesis for Intel (Altera) FPGAs.
+    synth_intel_alm      synthesis for ALM-based Intel (Altera) FPGAs.
+    synth_machxo2        synthesis for MachXO2 FPGAs. This work is experimental.
+    synth_nexus          synthesis for Lattice Nexus FPGAs
+    synth_quicklogic     Synthesis for QuickLogic FPGAs
+    synth_sf2            synthesis for SmartFusion2 and IGLOO2 FPGAs
+    synth_xilinx         synthesis for Xilinx FPGAs
+```
+
+For example, we can generate the json format netlist for Lattice ICE40 device as:
+
+```
+yosys -ql blink-yosys.log -p "read_verilog and_gate.v; synth_ice40 -json top.json"
+```
+
+A 'top.json' netlist for iCE40 will be generated. The synthesis process is platform related, for Lattice ECP5, you should use 'synth_ecp5' command, and for GOWIN (tang nano board), you should use 'synth_gowin' command. 
+
+
+## DigitalJS as circuit viewer and simulator after synthesis
+
+We already talk about "verification and simulation" in the design phase. [DigitalJS](https://github.com/tilk/digitaljs) is a digital circuit simulator implemented in Javascript. It is designed to simulate circuits synthesized by hardware design tools like Yosys.
+
+Refer to https://github.com/tilk/digitaljs for more information and how to install it.
+
+Here I suggest 2 way to use DigitalJS:
+
+**Online mode**
+
+Use your browser to open https://digitaljs.tilk.eu/ and upload 'and_gate.v', press "Synthesize and Simulate!" button:
+
+<img src="https://user-images.githubusercontent.com/1625340/159402821-2a3c02c2-6ff2-4c92-a514-e6de77b56205.png" width="50%"/>
+
+**Vscode extentions**
+
+I never suggest editors should be used before, but Vscode with Verilog and digitalJS extensions is really a good solution to write Verilog codes, you can simulate/verify the verilog codes within vscode with digitalJS, it looks like:
+
+<img src="https://user-images.githubusercontent.com/1625340/159403295-b87b2180-df69-4927-b19e-43da430b0160.png" width="50%"/>
+
+## ghdl-yosys-plugin as VHDL frontend for yosys
+
+By default, Yosys support Verilog 2005 as its input. with 'ghdl-yosys-plugin', Yosys can take VHDL as its input.
+
+Installation:
+
+```
+git clone https://github.com/ghdl/ghdl-yosys-plugin.git
+make
+mkdir -p /usr/share/yosys/plugins
+sudo install -m0755 ghdl.so /usr/share/yosys/plugins/
+```
+
+If you install yosys to another PREFIX, change it to 'PREFIX/share/yosys/plugins' dir.
+
+Basic usage (use and_gate.vhd from above example):
+
+```
+yosys -m ghdl -p 'ghdl and_gate.vhd -e and_gate; show'
+yosys -m ghdl -p 'ghdl and_gate.vhd -e and_gate; synth_ice40 -json top.json'
+```
+
+# Equivalence Checking
+Equivalence checking is a portion of a larger discipline called formal verification. This technology uses mathematical modeling techniques to prove that two representations of design exhibit the same behavior. it is useful when we change the codes but want to make sure it has the same behavior as before.
+
+Consider below two Verilog source files:
+
+and1.v
+```
+module and_gate(
+  input d1,
+  input d2,
+  output q
+);
+  assign q = d1 & d2;
+endmodule
+```
+
+and2.v
+```
+module and_gate(
+  input d1,
+  input d2,
+  output q
+);
+  reg r;
+  initial begin
+  if(d1 == 0 && d2 == 0)
+    r <= 0;
+  else if(d1 == 0 && d2 == 1)
+    r <= 0;
+  else if(d1 == 1 && d2 == 0)
+    r <= 0;
+  else
+    r <= 1;
+  end
+  assign q = r;
+endmodule
+```
+
+After reading the codes, we know they have the exact same behavior, 'equivalence checking' is used to prove it. 
+
+write a batch script 'eqv_check.yosys' as:
+
+```
+read_verilog and1.v
+prep -flatten -top and_gate
+splitnets -ports;;
+design -stash gold
+
+read_verilog and2.v
+prep -flatten -top and_gate
+splitnets -ports;;
+design -stash gate
+
+design -copy-from gold -as gold and_gate
+design -copy-from gate -as gate and_gate
+
+equiv_make gold gate merged
+prep -flatten -top merged
+
+opt_clean -purge
+show -prefix equiv-prep -colors 1 -stretch
+
+## method 1
+opt -full
+equiv_simple -seq 5
+equiv_induct -seq 5
+equiv_status -assert
+
+## method 2
+#equiv_struct -icells t:$adff t:$equiv
+#equiv_simple -seq 5
+#equiv_induct -seq 5
+#equiv_status -assert
+
+## method 3
+#techmap -map +/adff2dff.v
+#equiv_simple -seq 5
+#equiv_induct -seq 5
+#equiv_status -assert
+
+## method 4
+#clk2fflogic
+#equiv_simple -seq 10
+#equiv_induct -seq 10
+#equiv_status -assert
+```
+
+And run:
+
+```
+yosys eqv_check.yosys
+```
+
+The output looks like:
+
+```
+14. Executing EQUIV_STATUS pass.
+Found 1 $equiv cells in merged:
+  Of those cells 1 are proven and 0 are unproven.
+  Equivalence successfully proven!
+```
+
+There are 4 eqv checking method in this batch script, you can try them as you like.
+
+
+# Place and route
 Input: netlist json file generated by yosys and specific phisical constraints file, Output: bitstream file
 
-# Flashing
-
-
-
-
-
+# Deploy
 
