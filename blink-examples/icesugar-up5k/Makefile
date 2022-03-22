@@ -1,16 +1,10 @@
-# for openFPGALoader:
-# board name: https://trabucayre.github.io/openFPGALoader/compatibility/board.html
-# cabel name: https://trabucayre.github.io/openFPGALoader/compatibility/cable.html
-# fpga: https://trabucayre.github.io/openFPGALoader/compatibility/fpga.html
-
-
-# define project name, and used as result bitstream filename.
+# define project name, and should be same as top module name and also used as final bitstream filename.
 PROJECT = blink
 
 # available devices: nexus/ecp5/ice40/gowin. machxo2 had limited support for 1200, not enabled now.
 DEVICE = ice40 
 
-# source list. for multiple source files, TOP should be first one in list.
+# sources list seperated by space. for multiple source files, the top module should be first one in list.
 SOURCES = blink.v
 
 ############################################
@@ -150,14 +144,19 @@ endif
 ############################################
 #                 prog                     #
 ############################################
-# depend on your board design: 
+# it depends on your development board
+
+# for openFPGALoader:
+# board name: https://trabucayre.github.io/openFPGALoader/compatibility/board.html
+# cabel name: https://trabucayre.github.io/openFPGALoader/compatibility/cable.html
+# fpga: https://trabucayre.github.io/openFPGALoader/compatibility/fpga.html
 
 # for Lattice ECP5 devices
 ifeq ($(strip  $(DEVICE)), ecp5)
-# flash to ram using openocd
+# flash to ram using openocd:
 # sudo openocd -f ./cmsisdap.cfg -c "init;scan_chain;exit;"  #probe
 # sudo openocd -f ./cmsisdap.cfg -c "init;scan_chain;svf -tap ecp5.tap -quiet -progress ${PROJECT}.svf;exit;" # flash to sram
-# erase flash
+# erase flash:
 # ecpdap probes && ecpdap scan && ecpdap flash scan && ecpdap flash unprotect && ecpdap flash erase
 prog: all
 	# program to sram
