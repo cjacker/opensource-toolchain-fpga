@@ -683,7 +683,7 @@ For **ECP5**, you should build and install 'trellis' and for **GOWIN LittleBee**
 
 **Build and install nextpnr with different backends**
 
-For example, I enable Lattice Nexus/ECP5/iCE40 and GOWIN LittleBee support here:
+Up to this tutorial written, the latest release of nextpnr is '0.2', you can download the tarball release or use git codes from 'https://github.com/YosysHQ/nextpnr'. Here I enable Lattice Nexus/ECP5/iCE40 and GOWIN LittleBee support, Up to now, the iCE40 series, ECP5 series and GOWIN LittleBee series have the best support from Nextpnr.
 
 ```
 cmake . -DARCH="generic;ice40;nexus;ecp5;gowin" -DICEBOX_DATADIR=/usr/share/icestorm -DTRELLIS_LIBDIR=/usr/lib/trellis
@@ -693,6 +693,89 @@ make install
 
 After installation finished, there should have 'nextpnr-nexus'/'nextpnr-ecp5'/'nextpnr-ice40'/'nextpnr-gowin' installed in /usr/bin.
 
+## Usage for Lattice iCE40
+
+Here we use iCESugar with Lattice iCE50-UP5k development board as example, save below codes to 'blink.v':
+
+```
+module blink(input clk, output LED_R, output LED_G, output LED_B);
+   reg [25:0] counter;
+
+   initial begin
+      counter = 0;
+   end
+
+   always @(posedge clk)
+   begin
+      counter <= counter + 1;
+   end
+
+   assign LED_R = ~counter[23];
+   assign LED_G = ~counter[24];
+   assign LED_B = ~counter[25];
+endmodule
+```
+
+and below codes to 'io.pcf':
+
+```
+# all io pin used in blink.v
+set_io LED_G 41
+set_io LED_R 40
+set_io LED_B 39
+set_io clk   35
+```
+and Run:
+
+```
+$ yosys -ql blink-yosys.log -p "read_verilog blink.v; synth_ice40 -json top.json"
+$ nextpnr-ice40  -ql blink-nextpnr.log --up5k --package sg48 --json top.json --pcf io.pcf --asc top.asc --freq 48
+$ icepack top.asc blink.bin
+```
+
+The 'blink.bin' is the final bitstream file can be programmed to iCE40 FPGA.
+
+NOTE the parameters `--up5k` and `--package sg48` used with 'nextpnr-ice40' command, you should use the correct parameters according to your hardware.
+
+There is various blink examples and a Makefile template provided for ECP5/iCE40-UP5k/iCE40-LP1K and GOWIN LittleBee within this repo. you can take it as reference.
+
+Depend on the development status of backends, different backends can support different features, for example, the icetime program provided by icestorm is an iCE40 timing analysis tool. It reads designs in IceStorm ASCII format and writes times timing netlists that can be used in external timing analysers. It also includes a simple topological timing analyser that can be used to create timing reports.
+
+If you have a iCESugar nano board, the 'blink.v' should be:
+
+```
+module switch(  input CLK,
+                output LED
+                );
+   reg [25:0] counter;
+   initial begin
+      counter = 0;
+   end
+   always @(posedge CLK)
+   begin
+      counter <= counter + 1;
+   end
+   assign LED = ~counter[23];
+endmodule
+```
+
+and 'io.pcf' should be:
+```
+set_io LED B6
+set_io CLK D1
+```
+
+and Run:
+```
+yosys -ql blink-yosys.log -p "read_verilog blink.v; synth_ice40 -json top.json"
+nextpnr-ice40  -ql blink-nextpnr.log --lp1k --package cm36 --json top.json --pcf io.pcf --asc top.asc --freq 48
+icetime -d lp1k -mtr blink.rpt top.asc
+// Reading input .asc file..
+// Reading 1k chipdb file..
+// Creating timing netlist..
+// Timing estimate: 7.48 ns (133.68 MHz)
+icepack top.asc blink.bin
+```
 
 
 # Deploy
