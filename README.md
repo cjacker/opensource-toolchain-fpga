@@ -744,11 +744,26 @@ Depend on the development status of backends, different backends can support dif
 If you have a iCESugar nano board, the 'blink.v' should be:
 
 ```
+// blink.v
+// the default clk of icesugar nano is 12Mhz,
+// and can be adjusted by icesprog.
+//
+// $ icesprog -c 1
+// CLK -> [ 8MHz]
+// CLK-SELECT:
+//         [1]:  8MHz
+//         [2]: 12MHz
+//         [3]: 36MHz
+//         [4]: 72MHz
+// done
+
+// (2**24-1)/12M ~= 1.398s, by default, led blink every 1.398s.
+
 module blink(
    input clk,
    output led
 );
-   reg [25:0] counter;
+   reg [23:0] counter;
 
    initial begin
       counter = 0;
@@ -758,8 +773,7 @@ module blink(
       counter <= counter + 1;
    end
 
-   assign led = ~counter[23];
-
+  assign led = counter[23];
 endmodule
 ```
 
@@ -772,7 +786,7 @@ set_io clk D1
 and Run:
 ```
 $ yosys -ql blink-yosys.log -p "read_verilog blink.v; synth_ice40 -json top.json"
-$ nextpnr-ice40  -ql blink-nextpnr.log --lp1k --package cm36 --json top.json --pcf io.pcf --asc top.asc --freq 48
+$ nextpnr-ice40  -ql blink-nextpnr.log --lp1k --package cm36 --json top.json --pcf io.pcf --asc top.asc
 $ icetime -d lp1k -mtr blink.rpt top.asc
 // Reading input .asc file..
 // Reading 1k chipdb file..
