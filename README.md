@@ -693,7 +693,7 @@ make install
 
 After installation finished, there should have 'nextpnr-nexus'/'nextpnr-ecp5'/'nextpnr-ice40'/'nextpnr-gowin' installed in /usr/bin.
 
-## Usage for Lattice iCE40
+## Usage demo for Lattice iCE40 (iCESugar and iCESugar nano)
 
 Here we use iCESugar with Lattice iCE50-UP5k development board as example, save below codes to 'blink.v':
 
@@ -777,6 +777,9 @@ icetime -d lp1k -mtr blink.rpt top.asc
 icepack top.asc blink.bin
 ```
 
+## Usage demo for ECP5 (ColorLight-i9 board)
+
+## Usage demo for GOWIN LittleBee (Tangnano 9k board)
 
 # Deploy
 
