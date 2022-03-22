@@ -1,0 +1,4 @@
+LOCATE COMP "clk" SITE "P3";
+# FREQUENCY PORT "clk" 25 MHZ;
+LOCATE COMP "led" SITE "L2";
+
