@@ -1,5 +1,7 @@
 # OpenSource toolchain for FGPA
 
+**NOTE, this tutorial is still not complete.**
+
 A **field-programmable gate array (FPGA)** is an integrated circuit designed to be configured by a customer or a designer after manufacturing – hence the term field-programmable.
 
 FPGA is not a CPU or MCU or special-purpose IC whose configuration is set and sealed by a manufacturer and cannot be modified, it's a general purpose IC that can be programmed (configured) for specific use after it has been manufactured. FPGA contain adaptive logic modules (ALMs) and logic elements (LEs) connected via programmable interconnects. These blocks create a physical array of logic gates that can be customized to perform specific computing tasks. 
@@ -31,7 +33,7 @@ This tutorial will focus on this opensource toolchain. there are also some other
 * Synthesis: yosys and ghdl-yosys-plugin
 * Equivalence checking: yosys
 * Place and route: nextpnr with multiple backend(iCE40, ECP5, GOWIN, etc.)
-* Deploy/Flashing tool: various different tools for different FPGA family
+* Program/Flash tool: various different tools for different FPGA family
 * Other tools: gtkwave (waveform viewer), digitaljs (simulator), etc.
 
 
@@ -698,21 +700,42 @@ After installation finished, there should have 'nextpnr-nexus'/'nextpnr-ecp5'/'n
 Here we use iCESugar with Lattice iCE50-UP5k development board as example, save below codes to 'blink.v':
 
 ```
-module blink(input clk, output LED_R, output LED_G, output LED_B);
-   reg [25:0] counter;
+/*
+blink.v -- blink the RGB led on iCESugar board.
 
-   initial begin
-      counter = 0;
-   end
+  LED_B LED_G LED_R 
+  1     1     1    black   (all off)
+  1     1     0    red
+  1     0     1    green
+  1     0     0    yellow  (red + green)
+  0     1     1    blue
+  0     1     0    magenta (red + blue)
+  0     0     1    cyan    (green + blue)
+  0     0     0    white
 
-   always @(posedge clk)
-   begin
-      counter <= counter + 1;
-   end
+The default clock of iCESugar is 12Mhz.
+LED blink every (2**24-1)/12M ~= 1.398s
+*/
 
-   assign LED_R = ~counter[23];
-   assign LED_G = ~counter[24];
-   assign LED_B = ~counter[25];
+module blink(
+    input clk, 
+    output LED_R, 
+    output LED_G, 
+    output LED_B
+);
+    reg [23:0] counter;
+    
+    initial begin
+        counter = 24'd0;
+    end
+    
+    always @(posedge clk) begin
+        counter <= counter + 1;
+    end
+    
+    assign LED_R = ~counter[23];
+    assign LED_G = ~counter[23];
+    assign LED_B = ~counter[23];
 endmodule
 ```
 
@@ -729,7 +752,7 @@ and Run:
 
 ```
 $ yosys -ql blink-yosys.log -p "read_verilog blink.v; synth_ice40 -json top.json"
-$ nextpnr-ice40  -ql blink-nextpnr.log --up5k --package sg48 --json top.json --pcf io.pcf --asc top.asc --freq 48
+$ nextpnr-ice40  -ql blink-nextpnr.log --up5k --package sg48 --json top.json --pcf io.pcf --asc top.asc
 $ icepack top.asc blink.bin
 ```
 
@@ -757,7 +780,7 @@ If you have a iCESugar nano board, the 'blink.v' should be:
 //         [4]: 72MHz
 // done
 
-// (2**24-1)/12M ~= 1.398s, by default, led blink every 1.398s.
+// LED blink every (2**24-1)/12M ~= 1.398s.
 
 module blink(
    input clk,
@@ -797,7 +820,40 @@ $ icepack top.asc blink.bin
 
 ## Usage demo for ECP5 (ColorLight-i9 board)
 
+Please refer to 'https://github.com/cjacker/opensource-toolchain-fpga/tree/main/blink-examples/colorlight-i9-ecp5'.
+
+The building process as:
+```
+$ yosys -ql blink-yosys.log -p "read_verilog blink.v; synth_ecp5 -json top.json" blink.v
+$ nextpnr-ecp5  -ql blink-nextpnr.log --45k --package CABGA381 --speed 6 --json top.json --textcfg top.config --lpf io.lpf
+$ ecppack --bit blink.bit top.config
+```
+
+Note:
+* The format of physical constraints 'LPF' file is different with iCE40 'PCF' file.
+* the parameters of nextpnr-ecp5 is different with nextpnr-ice40.
+
 ## Usage demo for GOWIN LittleBee (Tangnano 9k board)
 
-# Deploy
+Please refer to https://github.com/cjacker/opensource-toolchain-fpga/tree/main/blink-examples/tang-nano-9k
+
+The building process for Tang nano 9k board is:
+
+```
+$ yosys -ql blink-yosys.log -p "read_verilog blink.v; synth_gowin -json top.json" blink.v
+$ nextpnr-gowin  -ql blink-nextpnr.log \
+        --json top.json \
+        --write pnrtop.json \
+        --device GW1NR-LV9QN88PC6/I5 \
+        --cst tangnano9k.cst
+$ gowin_pack -d GW1N-9C -o blink.fs pnrtop.json
+```
+
+Note:
+* The format of physical constraints 'CST' file is different.
+* you need supply the device family and model according to your device to setup the parameters of nextpnr-gowin and gowin_pack.
+
+
+# Flashing
+
 
