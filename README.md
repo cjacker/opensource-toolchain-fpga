@@ -853,6 +853,56 @@ Note:
 * The format of physical constraints 'CST' file is different.
 * you need supply the device family and model according to your device to setup the parameters of nextpnr-gowin and gowin_pack.
 
+## Usage demo of VHDL for Tang nano 9K
+All above blink examples are Verilog codes, Here is a VHDL blink example for iCE40-LP1K (Tang nano 9k dev board).
+
+```
+-- blink.vhdl
+-- blink LED of iCESugar nano board every 1s.
+
+library ieee;
+use ieee.std_logic_1164.all;
+
+entity blink is
+port(
+  clk: in std_logic;
+  led: out std_logic
+);
+end blink;
+
+architecture behavior of blink is
+begin
+  p1: process(clk)
+-- the default freq of icesugar nano is 12Mhz
+  variable count: integer range 0 to 12000000 := 0;
+  variable ledstatus: std_logic;
+  begin
+    if clk'event and clk = '1' then
+      if count < (4800000-1) then
+        count := count + 1;
+      else
+        count := 0;
+        ledstatus := not ledstatus;
+      end if;
+    end if;
+    led <= ledstatus;
+  end process;
+end behavior;
+```
+
+and Run below commands to generate the final bitstream:
+
+```
+$ yosys -m ghdl -ql blink-yosys.log -p "ghdl blink.vhdl -e blink; synth_ice40 -json top.json"
+$ nextpnr-ice40  -ql blink-nextpnr.log --lp1k --package cm36 --json top.json --pcf io.pcf --asc top.asc --freq 12
+$ icetime -d lp1k -mtr blink.rpt top.asc
+// Reading input .asc file..
+// Reading 1k chipdb file..
+// Creating timing netlist..
+// Timing estimate: 10.76 ns (92.96 MHz)
+$ icepack top.asc blink.bin
+```
+You may noticed that only the Yosys command is different with Verilog example.
 
 # Flashing
 
