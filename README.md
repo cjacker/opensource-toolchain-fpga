@@ -1,7 +1,5 @@
 # OpenSource toolchain for FGPA
 
-**NOTE, this tutorial is still not complete.**
-
 A **field-programmable gate array (FPGA)** is an integrated circuit designed to be configured by a customer or a designer after manufacturing – hence the term field-programmable.
 
 FPGA is not a CPU, MCU or special-purpose IC whose configuration is set and sealed by a manufacturer and cannot be modified, it's a general purpose IC that can be programmed (configured) after it has been manufactured. FPGA contain adaptive logic modules (ALMs) and logic elements (LEs) connected via programmable interconnects. These blocks create a physical array of logic gates that can be customized to perform specific computing tasks. 
@@ -16,9 +14,11 @@ Until a few years ago, developing for FPGAs required the use of proprietary lock
 
 There is an article describing the design of Yosys/Nextpnr opensource FPGA toolchain very clearly and briefly, please refer to https://arxiv.org/pdf/1903.10407.pdf. 
 
+By the way, DO NOT CRITICIZE anything about the opensource FPGA toolchain, it's pointless. for beginners, the opensource FPGA toolchain is very easy to get and setup, very friendly to use，very clean to understand the FPGA development flow and good enough to start a project.
+
 # Hardware requirements
 
-* A FPGA development board, which can be well supported by yosys/nextpnr.
+* A FPGA development board, which can be well supported by yosys/nextpnr and not too expensive.
   - Lattice iCE40 or ECP5 family. for example, iCE40 ICEBreaker, ICESugar, ICESugar nano board, or ECP5 Colorlight series board.
   - Gowin LittleBee family. for example, Tang nano/1k/4k/9k board.
 * Optional, a JTAG adapter.
@@ -496,13 +496,15 @@ Yosys support below synthesis command:
     synth_xilinx         synthesis for Xilinx FPGAs
 ```
 
+What we used in this tutorial is 'synth_ice40'/'synth_ecp5'/'synth_nexus'/'synth_gowin'.
+
 For example, we can generate the json format netlist for Lattice ICE40 device as:
 
 ```
 yosys -ql blink-yosys.log -p "read_verilog and_gate.v; synth_ice40 -json top.json"
 ```
 
-A 'top.json' netlist for iCE40 will be generated. The synthesis process is platform related, for Lattice ECP5, you should use 'synth_ecp5' command, and for GOWIN (tang nano board), you should use 'synth_gowin' command. 
+A 'top.json' netlist for iCE40 will be generated. The synthesis process is platform related, for Lattice ECP5, you should use 'synth_ecp5' command, and for GOWIN (tang nano board), use 'synth_gowin' command. 
 
 
 ## DigitalJS as circuit viewer and simulator after synthesis
@@ -915,7 +917,7 @@ You may noticed that only the Yosys command is different with Verilog example.
 
 # Flashing
 
-After bitstream file generated, the last step is to upload it to the real FPGA hardware. 
+Congratulation, when you reach the 'flashing' section, you should already have the bitstream file generated for your FPGA hardware, it's really not an easy task. the last step we will do is to upload it to the real FPGA hardware. 
 
 There are various tools we can use, such as openocd, openFPGALoader or some board related tool. actually it depends on not only the FPGA chip but also the development board. for example, 'iceprog' provided by icestorm is a programming tool specially for **FTDI-based** Lattice iCE programmers.
 
@@ -981,3 +983,11 @@ openFPGALoader has Tang nano serires board support.  for tangnano 9k board:
 openFPGALoader -b tangnano9k bitstream.fs
 ```
 
+
+# Project and Makefile template
+
+I already made a [Makefile template](https://github.com/cjacker/opensource-toolchain-fpga/blob/main/Makefile.template) which include everything in this tutorial, you can use it to start a project very quickly.
+
+When you start a new project, you need modify the 'PROJECT'/'DEVICE'/'SOURCES' vars in Makefile, and also need to check the options defined per arch according to your hardware.
+
+for physical constraints file per development board, you can take a look into 'blink-examples', the complete physical constraints file for iCESugar and Tang nano/1k/4k/9k already provided in corresponding folder of 'blink-examples'. you can also write it manually according to the board's circuit schematic.
