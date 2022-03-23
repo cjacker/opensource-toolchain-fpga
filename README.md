@@ -16,8 +16,6 @@ Until a few years ago, developing for FPGAs required the use of proprietary lock
 
 There is an article describing the design of Yosys/Nextpnr opensource FPGA toolchain very clearly and briefly, please refer to https://arxiv.org/pdf/1903.10407.pdf. 
 
-This tutorial will focus on this opensource toolchain. there are also some other opensource FPGA toolchains or frameworks, most of them are based on yosys/nextpnr, you do not need to care about them at this time.
-
 # Hardware requirements
 
 * A FPGA development board, which can be well supported by yosys/nextpnr.
@@ -26,6 +24,8 @@ This tutorial will focus on this opensource toolchain. there are also some other
 * Optional, a JTAG adapter.
   - most of FPGA development board already integrated one.
 
+NOTE:
+* QuickLogic devices (QLF-K4N8, QLF-K6N10 and EOS-S3) and Xilinx 7 series can be supported by Symbiflow/prjxray/Yosys/VTR, I will extend this tutorial after acquiring a dev board.
 
 # Toolchain overview:
 We will follow the FPGA design flow to describe the FPGA toolchain.
@@ -473,7 +473,8 @@ yosys -p "read_verilog and_gate.v; show"
 
 **Synthesis**
 
-Yosys support below synthesis command (run 'help' in REPL mode):
+Yosys support below synthesis command:
+
 ```
     synth                generic synthesis script
     synth_achronix       synthesis for Acrhonix Speedster22i FPGAs.
@@ -914,4 +915,69 @@ You may noticed that only the Yosys command is different with Verilog example.
 
 # Flashing
 
+After bitstream file generated, the last step is to upload it to the real FPGA hardware. 
+
+There are various tools we can use, such as openocd, openFPGALoader or some board related tool. actually it depends on not only the FPGA chip but also the development board. for example, 'iceprog' provided by icestorm is a programming tool specially for **FTDI-based** Lattice iCE programmers.
+
+The most common used opensource FPGA flashing tool is openFPGALoader, it has a compatibility list about [FPGA chip](https://trabucayre.github.io/openFPGALoader/compatibility/fpga.html), [development board](https://trabucayre.github.io/openFPGALoader/compatibility/board.html), [cables and adapters](https://trabucayre.github.io/openFPGALoader/compatibility/cable.html), you can take it as reference.
+
+For development boards mentioned in this tutorial,
+
+**iCEBreaker:**
+
+iCEBreaker had on-board FTDI FT2232H integrated, you can directly use 'iceprog' to flashing:
+```
+iceprog <bitstream file>
+```
+
+**iCESugar and iCESugar nano:**
+
+There are 2 way to flash iCESugar board.
+
+* USB storage
+
+iCESugar can be mounted as USB storage device, and you can DND the bitstream file to it.
+
+* icesprog
+
+The designer of iCESugar also develop a flashing tool named ['icesprog'](https://github.com/wuxx/icesugar/tree/master/tools
+) (NOTE, it's ice**s**prog, not iceprog)
+
+```
+icesprog <bistream file>
+```
+
+**Colorlight series with Lattice ECP5:**
+
+NOTE: by default, the flash of colorlight series board is write-protected.
+
+You can use openocd to flash the ColorLight ECP5 series board, but it not the best choice.
+
+```
+$ sudo openocd -f ./cmsisdap.cfg -c "init;scan_chain; exit;"  #probe
+$ sudo openocd -f ./cmsisdap.cfg -c "init;scan_chain; svf -tap ecp5.tap -quiet -progress bistream.svf; exit;" # flash to sram
+```
+
+[ecpprog](https://github.com/gregdavill/ecpprog) is a programmer for the Lattice ECP5 series, making use of **FTDI based** JTAG adaptors. it had some special features, for example, unlock the protected flash of colorlight board.
+
+```
+# program to sram:
+ecpdap probes && ecpdap scan && ecpdap program --freq 5000 bistream.bit
+
+# erase flash:
+ecpdap probes && ecpdap scan && ecpdap flash scan && ecpdap flash unprotect && ecpdap flash erase
+
+# program to flash: 
+ecpdap probes && ecpdap scan && ecpdap flash scan && ecpdap flash unprotect && ecpdap flash --freq 5000 write bitstream.bit && ecpdap flash protect
+```
+
+There is also [ecpdap](https://github.com/adamgreig/ecpdap/) which allows you to program ECP5 FPGAs and attached SPI flash using CMSIS-DAP probes in JTAG mode. 
+
+**Tang nano series board with GOWIN FPGA:**
+
+openFPGALoader has Tang nano serires board support.  for tangnano 9k board:
+
+```
+openFPGALoader -b tangnano9k bitstream.fs
+```
 
