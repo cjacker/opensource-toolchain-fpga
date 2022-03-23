@@ -549,6 +549,14 @@ yosys -m ghdl -p 'ghdl and_gate.vhd -e and_gate; show'
 yosys -m ghdl -p 'ghdl and_gate.vhd -e and_gate; synth_ice40 -json top.json'
 ```
 
+# Formal verification
+
+TODO
+
+Please refer to "https://www.yumpu.com/en/document/read/57038912/formal-verification-with-yosys-smtbmc-clifford-wolf" and "https://readthedocs.org/projects/symbiyosys/downloads/pdf/latest/".
+
+
+
 # Equivalence Checking
 
 Equivalence checking is a portion of a larger discipline called formal verification. This technology uses mathematical modeling techniques to prove that two representations of design exhibit the same behavior. it is useful when we change the codes but want to make sure it has the same behavior as before.
