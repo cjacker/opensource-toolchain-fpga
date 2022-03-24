@@ -549,14 +549,6 @@ yosys -m ghdl -p 'ghdl and_gate.vhd -e and_gate; show'
 yosys -m ghdl -p 'ghdl and_gate.vhd -e and_gate; synth_ice40 -json top.json'
 ```
 
-# Formal verification
-
-TODO
-
-Please refer to "https://www.yumpu.com/en/document/read/57038912/formal-verification-with-yosys-smtbmc-clifford-wolf" and "https://readthedocs.org/projects/symbiyosys/downloads/pdf/latest/".
-
-
-
 # Equivalence Checking
 
 Equivalence checking is a portion of a larger discipline called formal verification. This technology uses mathematical modeling techniques to prove that two representations of design exhibit the same behavior. it is useful when we change the codes but want to make sure it has the same behavior as before.
@@ -661,6 +653,24 @@ Found 1 $equiv cells in merged:
 ```
 
 There are 4 eqv checking method in this batch script, you can try them as you like.
+
+# Formal verification
+
+FV is a difficult topic for beginners, you can ignore this section now.
+
+Here is some tutorials for you reference:
+
+http://www.testandverification.com/wp-content/uploads/2017/Formal_Verification/Clifford_Wolf.pdf
+
+https://www.yumpu.com/en/document/read/57038912/formal-verification-with-yosys-smtbmc-clifford-wolf
+
+https://zipcpu.com/tutorial/
+
+https://zipcpu.com/blog/2017/10/19/formal-intro.html
+
+https://zipcpu.com/tutorial/formal.html
+
+https://readthedocs.org/projects/symbiyosys/downloads/pdf/latest/
 
 
 # Place and route
