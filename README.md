@@ -701,7 +701,7 @@ We will introduce the usage of nextpnr for iCE40, ECP5 and Gowin LittleBee, sinc
 
 ## Installation
 
-The installation of nextpnr with different backends is not very easy, If your dist provide the latest version, you can use it directly. if you want to build it yourself, usally you should below steps: 1) build and install the bitstream generating tool according to FPGA you use, 2) build the nextpnr with correct backend. 
+The installation of nextpnr with different backends is not very easy, If your dist provide the latest version, you can use it directly. if you want to build it yourself, usally you should follow below steps: 1) build and install the bitstream generating tool according to FPGA you use, 2) build the nextpnr with correct backend. 
 
 **Build and install the bitstream generating tool**
 
