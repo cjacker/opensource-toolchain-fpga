@@ -22,7 +22,7 @@ By the way, DO NOT CRITICIZE anything about the opensource FPGA toolchain, it's 
 
 * A FPGA development board, which can be well supported by yosys/nextpnr and not too expensive.
   - Lattice iCE40 or ECP5 family. for example, iCE40 ICEBreaker, ICESugar, ICESugar nano board, or ECP5 Colorlight series board.
-  - Gowin LittleBee family. for example, Tang nano/1k/4k/9k board.
+  - Gowin LittleBee family. for example, Tang nano 1k/4k/9k/20k, Tang primer 20k board.
 * Optional, a JTAG adapter.
   - most of FPGA development board already integrated one.
 
@@ -715,15 +715,17 @@ For **ECP5**, you should build and install 'trellis' and for **GOWIN LittleBee**
 
 **Build and install nextpnr with different backends**
 
-Up to this tutorial written, the latest release of nextpnr is '0.2', you can download a tarball release or use git codes from 'https://github.com/YosysHQ/nextpnr'. Here I enable Lattice Nexus/ECP5/iCE40 and GOWIN LittleBee support, Up to now, the iCE40 series, ECP5 series and GOWIN LittleBee series have the best support from Nextpnr.
+Up to this tutorial written, the latest release of nextpnr is '0.7', you can download a tarball release or use git codes from 'https://github.com/YosysHQ/nextpnr'. Here I enable Lattice Nexus/ECP5/iCE40 and GOWIN LittleBee support. Up to now, the iCE40 series, ECP5 series and GOWIN LittleBee series have the best support from Nextpnr.
+
+**Update 2024-11-22**: 'nextpnr-himbaechel' had better Gowin 2A family support than 'nextpnr-gowin', please use 'nextpnr-himbaechel' instead of 'nextpnr-gowin'.
 
 ```
-cmake . -DARCH="generic;ice40;nexus;ecp5;gowin" -DICEBOX_DATADIR=/usr/share/icestorm -DTRELLIS_LIBDIR=/usr/lib/trellis
+cmake . -DARCH="generic;ice40;nexus;ecp5;gowin;himbaechel" -DHIMBAECHEL_GOWIN_DEVICES="all" -DICEBOX_DATADIR=/usr/share/icestorm -DTRELLIS_LIBDIR=/usr/lib/trellis
 make
 make install 
 ```
 
-After installation finished, there should have 'nextpnr-nexus'/'nextpnr-ecp5'/'nextpnr-ice40'/'nextpnr-gowin' installed in /usr/bin.
+After installation finished, there should have 'nextpnr-nexus'/'nextpnr-ecp5'/'nextpnr-ice40'/'nextpnr-gowin'/'nextpnr-himbaechel' installed in /usr/bin.
 
 ## Usage demo for Lattice iCE40 (iCESugar and iCESugar nano)
 
@@ -870,8 +872,22 @@ Note:
 
 Please refer to https://github.com/cjacker/opensource-toolchain-fpga/tree/main/blink-examples/tang-nano-9k
 
-The building process for Tang nano 9k board is:
+The building process for Tang nano 9k is:
 
+```
+yosys -ql blink-yosys.log -p "read_verilog blink.v; synth_gowin -json top.json" blink.v
+nextpnr-himbaechel -ql blink-nextpnr.log \
+    --json top.json \
+    --write pnrtop.json \
+    --device GW1NR-LV9QN88PC6/I5 \
+    --vopt family=GW1N-9C \
+    --vopt cst=tangnano9k.cst
+gowin_pack -d GW1N-9C -o blink.fs pnrtop.json
+```
+
+**nextpnr-gowin is deprecated**
+
+If you use 'nextpnr-gowin', the building process is:
 ```
 $ yosys -ql blink-yosys.log -p "read_verilog blink.v; synth_gowin -json top.json" blink.v
 $ nextpnr-gowin  -ql blink-nextpnr.log \
@@ -886,7 +902,7 @@ Note:
 * The format of physical constraints 'CST' file is different.
 * you need supply the device family and model according to your device to setup the parameters of nextpnr-gowin and gowin_pack.
 
-## Usage demo of VHDL for Tang nano 9K
+## Usage demo of VHDL for iCESugar nano
 
 All above blink examples are Verilog codes, Here is a VHDL blink example for iCE40-LP1K (iCESugar nano dev board).
 
