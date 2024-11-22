@@ -1,8 +1,10 @@
 # define project name, and should be same as top module name and also used as final bitstream filename.
 PROJECT = blink
 
-# available devices: nexus/ecp5/ice40/gowin. machxo2 had limited support for 1200, not enabled now.
-DEVICE = gowin 
+# available devices: nexus/ecp5/ice40/gowin/himbaechel. machxo2 had limited support for 1200, not enabled now.
+# DEVICE = gowin
+# use himbaechel instead of gowin
+DEVICE = himbaechel
 
 # sources list seperated by space. for multiple source files, the top module should be first one in list.
 SOURCES = blink.v
@@ -84,15 +86,49 @@ ifeq ($(strip  $(DEVICE)), gowin)
   OBJECT = $(PROJECT).fs
 endif
 
+# use himbaechel instead gowin
+ifeq ($(strip  $(DEVICE)), himbaechel)
+# tang nano
+  #GOWIN_DEVICE = GW1N-LV1QN48C6/I5
+  #GOWIN_PACK_DEVICE = GW1N-1
+  #PC_FILE = tangnano.cst
+# tang nano 1k
+  #GOWIN_DEVICE = GW1NZ-LV1QN48C6/I5
+  #GOWIN_PACK_DEVICE = GW1NZ-1
+  #PC_FILE = tangnano1k.cst
+# tang nano 4k
+  #GOWIN_DEVICE = GW1NSR-LV4CQN48PC7/I6
+  #GOWIN_PACK_DEVICE = GW1NS-4
+  #PC_FILE = tangnano4k.cst
+# tang nano 9k
+  GOWIN_DEVICE = GW1NR-LV9QN88PC6/I5
+  GOWIN_PACK_DEVICE = GW1N-9C
+  PC_FILE = tangnano9k.cst
+# tang nano 20k
+  #GOWIN_DEVICE = GW2AR-LV18QN88C8/I7
+  #GOWIN_PACK_DEVICE = GW2A-18C
+	#PC_FILE = tangnano20k.cst
+# tang primer 20k
+  #GOWIN_DEVICE = GW2A-LV18PG256C8/I7
+  #GOWIN_PACK_DEVICE = GW2A-18
+  #PC_FILE = primer20k.cst
+
+  OBJECT = $(PROJECT).fs
+endif
+
 all: $(OBJECT)
 
 ############################################
 #              Synthesis                   #
 ############################################
 
+ifeq ($(strip  $(DEVICE)), himbaechel)
+top.json: $(SOURCES)
+	yosys -ql ${PROJECT}-yosys.log -p "read_verilog $<; synth_gowin -json $@" $(SOURCES)
+else
 top.json: $(SOURCES)
 	yosys -ql ${PROJECT}-yosys.log -p "read_verilog $<; synth_$(strip  $(DEVICE)) -json $@" $(SOURCES)
-
+endif
 
 ############################################
 #          place and route and pack        #
@@ -141,6 +177,20 @@ $(PROJECT).fs: pnrtop.json
 	gowin_pack -d ${GOWIN_PACK_DEVICE} -o ${PROJECT}.fs pnrtop.json
 endif
 
+# for Gowin
+ifeq ($(strip  $(DEVICE)), himbaechel)
+pnrtop.json: top.json $(PC_FILE)
+	nextpnr-$(DEVICE) -ql ${PROJECT}-nextpnr.log \
+    --json top.json \
+    --write pnrtop.json \
+    --device ${GOWIN_DEVICE} \
+    --vopt family=${GOWIN_PACK_DEVICE} \
+    --vopt cst=${PC_FILE}
+
+$(PROJECT).fs: pnrtop.json
+	gowin_pack -d ${GOWIN_PACK_DEVICE} -o ${PROJECT}.fs pnrtop.json
+endif
+
 ############################################
 #                 prog                     #
 ############################################
@@ -179,6 +229,12 @@ ifeq ($(strip  $(DEVICE)), gowin)
 prog: all
 	openFPGALoader -b tangnano9k ${PROJECT}.fs
 endif
+
+ifeq ($(strip  $(DEVICE)), himbaechel)
+prog: all
+	openFPGALoader -b tangnano9k ${PROJECT}.fs
+endif
+
 
 ############################################
 #                 clean                    #
